@@ -1,5 +1,7 @@
 from flask import Flask, send_from_directory
 
+# flask setup for the console
+
 class config:
     # Obviously, you'd want to put the secret key in an .env file for production
     # put for the sake of ease when testing the app, it is hard coded here

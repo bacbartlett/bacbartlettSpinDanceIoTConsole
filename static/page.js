@@ -1,9 +1,46 @@
+//global to keep track of active devices
 const devices = []
 
+// function to generate the graphs for incoming data
 const makeGraphs = (readings, diagnostics) => {
-    console.log("here")
+    const graphdiv = document.getElementById("graphContainers")
+
+    const graphGroup = document.createElement("div")
+    graphdiv.prepend(graphGroup)
+
+    const readingsTable = document.createElement("table")
+    const readingHeader = document.createElement("tr")
+    readingsTable.appendChild(readingHeader)
+    readingHeader.innerHTML = "<td>Timestamp</td><td>Temperature</td><td>Humidity</td><td>Pressure</td>"
+
+    for(let i = 0; i < readings.length; i++){
+        const row = document.createElement("tr")
+        const data = readings[i]
+        row.innerHTML = `<td>${data.timestamp}</td><td>${data.temperature}</td><td>${data.humidity}</td><td>${data.pressure}</td>`
+        readingsTable.appendChild(row)
+    }
+
+    graphGroup.appendChild(readingsTable)
+
+    const diagnosticsTable = document.createElement("table")
+    const diagnosticsHeader = document.createElement("tr")
+    diagnosticsTable.appendChild(diagnosticsHeader)
+    diagnosticsHeader.innerHTML = "<td>Timestamp</td><td>Min-Temperature</td><td>Max-Temperature</td><td>Avg-Temperature</td><td>Min-Humidity</td><td>Max-Humidity</td><td>Avg-Humidity</td><td>Min-Pressure</td><td>Max-Pressure</td><td>Avg-Pressure</td>"
+
+    for(let i = 0; i < diagnostics.length; i++){
+        const row = document.createElement("tr")
+        const data = diagnostics[i]
+        row.innerHTML = `<td>${data.timestamp}</td><td>${data["min-temperature"]}</td><td>${data["max-temperature"]}</td><td>${data["avg-temperature"]}</td><td>${data["min-humidity"]}</td><td>${data["max-humidity"]}</td><td>${data["avg-humidity"]}</td><td>${data["min-pressure"]}</td><td>${data["max-pressure"]}</td><td>${data["avg-pressure"]}</td>`
+        diagnosticsTable.append(row)
+    }
+
+    graphGroup.prepend(diagnosticsTable)
+
+
 }
 
+//this function is run on a constant interval to establish which devices are currently connected
+//it then toggles the controls to be sure only active devices are interacted with
 const checkDevices = async () => {
     for(let i = 0; i < devices.length; i++){
         try{
@@ -31,13 +68,15 @@ const checkDevices = async () => {
     }
 }
 
+//sends query to device
 const sendQuery = async (e) => {
+    //attributes kept in div properties for fetching
     const name = e.target.parentNode.id
     const ip = e.target.parentNode.ip
-    console.log(name + "-windowSize")
     const window = document.getElementById(name + "-windowSize").value
     const interval = document.getElementById(name + "-intervalSize").value
     let filePath = document.getElementById(name + "-filePath").value
+    //url encodes the filepath
     filePath = filePath.split("/").join("%2F")
     let queryString = ip + "/" + window.toString() + "/"
     queryString += interval.toString()
@@ -46,6 +85,7 @@ const sendQuery = async (e) => {
     
     const data = await res.json()
 
+    //displays basic error
     if(data.msg){
         alert(data.msg)
     } else if(data.readings && data.diagnostics){
@@ -55,11 +95,16 @@ const sendQuery = async (e) => {
     }
 }
 
+//this function adds each new device and hooks up the inputs correctly
+//it also made me appreciate React more!
 const addDevice = () => {
     const newDevice = {
         ip: document.getElementById("newdeviceIP").value,
         name: document.getElementById("newdeviceName").value,
         status: "Connecting..."
+    }
+    if(newDevice.ip === "" || newDevice.name === ""){
+        return
     }
     if(!newDevice.ip.startsWith("http://")){
         newDevice.ip = "http://" + newDevice.ip

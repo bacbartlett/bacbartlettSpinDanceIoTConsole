@@ -1,0 +1,8 @@
+body{
+    background-color: wheat;
+}
+
+.displayNode{
+    display: flex;
+    justify-content: space-evenly;
+}

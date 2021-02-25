@@ -45,7 +45,6 @@ const checkDevices = async () => {
     for(let i = 0; i < devices.length; i++){
         try{
             const res = await fetch(devices[i].ip + "/ping")
-            console.log("Setting to connected")
             devices[i].statusNode.innerHTML = "Connected"
             const section = devices[i].statusNode.parentNode
             section.classList.remove("Disconnected")
